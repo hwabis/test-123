@@ -13,13 +13,15 @@ namespace Test123Server.Hubs
 
             Console.WriteLine(numberOfClients + " clients now");
             Clients.Client(Context.ConnectionId).SendAsync("ReceiveName", "dude #" + numberOfClients.ToString());
+            Clients.Client(Context.ConnectionId).SendAsync("ReceiveChatMessage", "server", "welcome");
 
             return base.OnConnectedAsync();
         }
 
         public override Task OnDisconnectedAsync(Exception? exception)
         {
-            numberOfClients--;
+            Interlocked.Decrement(ref numberOfClients);
+            Console.WriteLine(numberOfClients + " clients now");
 
             return base.OnDisconnectedAsync(exception);
         }
