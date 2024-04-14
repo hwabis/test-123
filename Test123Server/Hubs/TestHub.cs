@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Numerics;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Test123Server.Hubs
 {
@@ -27,6 +28,11 @@ namespace Test123Server.Hubs
         {
             Console.WriteLine("received chat message");
             await Clients.All.SendAsync("ReceiveChatMessage", user, message);
+        }
+
+        public async Task SendBoxPosition(float x, float y)
+        {
+            await Clients.AllExcept(Context.ConnectionId).SendAsync("ReceiveBoxPosition", x, y);
         }
     }
 }

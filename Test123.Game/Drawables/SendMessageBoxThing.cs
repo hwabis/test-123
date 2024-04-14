@@ -8,7 +8,7 @@ namespace Test123.Game.Drawables
 {
     public partial class SendMessageBoxThing : BasicTextBox
     {
-        public string NameOfUserSendingTheMessages { get; set; }
+        public string NameOfUserSendingTheMessages { get; set; } = "???";
 
         private HubConnection hubConnection;
 

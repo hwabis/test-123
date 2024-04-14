@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -16,6 +17,11 @@ namespace Test123.Game
         private HubConnection hubConnection;
         private ChatBoxThing chatBox;
         private SendMessageBoxThing sendMessageBox;
+        private MovingSpinningBox movingSpinningBox;
+
+        private double timeOfLastTimeSentBoxPosition;
+
+        private bool isSpinningBoxOwner => sendMessageBox.NameOfUserSendingTheMessages == "dude #1"; // i've made an absolute mess LOL
 
         public MainScreen()
         {
@@ -37,13 +43,21 @@ namespace Test123.Game
                     chatBox.AddMessage(newMessage);
                 });
             });
-
+            
             hubConnection.On<string>("ReceiveName", (username) =>
             {
                 Schedule(() =>
                 {
                     chatBox.AddMessage("YOUR NAME IS " + username);
                     sendMessageBox.NameOfUserSendingTheMessages = username;
+                });
+            });
+
+            hubConnection.On<float, float>("ReceiveBoxPosition", (x, y) =>
+            {
+                Schedule(() =>
+                {
+                    movingSpinningBox.Position = new osuTK.Vector2(x, y);
                 });
             });
         }
@@ -58,7 +72,7 @@ namespace Test123.Game
                     Colour = Color4.Violet,
                     RelativeSizeAxes = Axes.Both,
                 },
-                new MovingSpinningBox
+                movingSpinningBox = new MovingSpinningBox
                 {
                     Anchor = Anchor.Centre,
                 },
@@ -87,6 +101,26 @@ namespace Test123.Game
             });
 
             chatBox.AddMessage("welcom");
+
+            timeOfLastTimeSentBoxPosition = Time.Current;
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+
+            // send the box position every few milliseconds lol
+            double current_time = Time.Current;
+
+            if (isSpinningBoxOwner && current_time - timeOfLastTimeSentBoxPosition > 33)
+            {
+                if (hubConnection.State == HubConnectionState.Connected)
+                {
+                    sendBoxPosition(); // i guess we don't await
+                }
+
+                timeOfLastTimeSentBoxPosition = current_time;
+            }
         }
 
         private async Task connectToServer(HubConnection connection)
@@ -106,6 +140,12 @@ namespace Test123.Game
             }
 
             Logger.Log("connected");
+        }
+
+        private async void sendBoxPosition()
+        {
+            // i tried sending System.Numerics.Vector2 but server kept getting 0,0 so i guess that doesn't work
+            await hubConnection.InvokeAsync("SendBoxPosition", movingSpinningBox.Position.X, movingSpinningBox.Position.Y);
         }
     }
 }
