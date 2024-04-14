@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 
 namespace Test123Server.Hubs
 {
@@ -12,7 +11,7 @@ namespace Test123Server.Hubs
             Interlocked.Increment(ref numberOfClients);
 
             Console.WriteLine(numberOfClients + " clients now");
-            Clients.Client(Context.ConnectionId).SendAsync("ReceiveName", "dude #" + numberOfClients.ToString());
+            Clients.Client(Context.ConnectionId).SendAsync("ReceiveName", "dude #" + new Random().Next());
             Clients.Client(Context.ConnectionId).SendAsync("ReceiveChatMessage", "server", "welcome");
 
             return base.OnConnectedAsync();

@@ -74,7 +74,7 @@ namespace Test123.Game
                         ipTextBox = new BasicTextBox
                         {
                             Height = 50,
-                            Width = 200,
+                            Width = 500,
                             PlaceholderText = "ip"
                         },
                         new BasicButton
@@ -126,6 +126,7 @@ namespace Test123.Game
             {
                 connected = false;
                 await hubConnection.StopAsync();
+                await hubConnection.DisposeAsync();
                 Logger.Log("Disconnected previous connection");
             }
 
